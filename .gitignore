@@ -7,3 +7,21 @@ out
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+
+# Editors and IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+
+# Vercel CLI
+.vercel
+
+# Logs and debug output
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
