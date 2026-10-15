@@ -73,6 +73,7 @@ export default async function ConversationPage({
           </span>
           <ConversationActions
             conversationId={conversation.id}
+            status={conversation.status}
             isWindowOpen={freeFormWindow.isOpen}
             lastGuestMessageAt={freeFormWindow.lastGuestMessageAt}
           />

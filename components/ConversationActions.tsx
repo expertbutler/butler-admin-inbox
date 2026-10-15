@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ScrollToLatest } from '@/components/ScrollToLatest';
+import { ConversationStatus } from '@/types/database';
 
 type ConversationActionsProps = {
   conversationId: string;
+  status: ConversationStatus;
   isWindowOpen: boolean;
   lastGuestMessageAt: string | null;
 };
@@ -30,6 +32,7 @@ const post = async (path: string, body: unknown) => {
 
 export const ConversationActions = ({
   conversationId,
+  status,
   isWindowOpen,
   lastGuestMessageAt,
 }: ConversationActionsProps) => {
@@ -59,27 +62,34 @@ export const ConversationActions = ({
     if (sent) setReply('');
   };
 
-  const handleStatus = (status: 'resolved' | 'ai_active') =>
-    run(() => post(`/api/conversations/${conversationId}/status`, { status }));
+  const handleStatus = (nextStatus: 'resolved' | 'ai_active') =>
+    run(() => post(`/api/conversations/${conversationId}/status`, { status: nextStatus }));
+
+  const isResolved = status === 'resolved';
+  // butler-da also offers "Take over from AI" here, but its endpoint only accepts
+  // 'resolved' and 'ai_active', so an AI-handled conversation has no first button.
+  const canHandBack = status === 'needs_human' || status === 'staff_handling';
 
   return (
     <>
       <div className="flex gap-2">
+        {canHandBack ? (
+          <button
+            type="button"
+            onClick={() => handleStatus('ai_active')}
+            disabled={isBusy}
+            className="rounded border border-slate-300 px-3 py-2 text-sm disabled:opacity-50"
+          >
+            Hand back to AI
+          </button>
+        ) : null}
         <button
           type="button"
-          onClick={() => handleStatus('ai_active')}
+          onClick={() => handleStatus(isResolved ? 'ai_active' : 'resolved')}
           disabled={isBusy}
           className="rounded border border-slate-300 px-3 py-2 text-sm disabled:opacity-50"
         >
-          Hand back to AI
-        </button>
-        <button
-          type="button"
-          onClick={() => handleStatus('resolved')}
-          disabled={isBusy}
-          className="rounded border border-slate-300 px-3 py-2 text-sm disabled:opacity-50"
-        >
-          Mark resolved
+          {isResolved ? 'Reopen conversation' : 'Resolve conversation'}
         </button>
       </div>
 
