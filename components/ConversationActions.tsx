@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ScrollToLatest } from '@/components/ScrollToLatest';
 
 type ConversationActionsProps = {
   conversationId: string;
@@ -83,7 +84,8 @@ export const ConversationActions = ({
       </div>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-3">
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-2 px-6 py-3">
+          <ScrollToLatest />
           {isWindowOpen ? (
             <div className="flex gap-2">
               <input
