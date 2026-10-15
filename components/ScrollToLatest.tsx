@@ -17,11 +17,26 @@ export const ScrollToLatest = () => {
   useEffect(() => {
     scrollToBottom('instant');
 
-    const update = () => setIsAtBottom(isNearBottom());
+    // Tracked separately from state because it must hold the position from *before* the page
+    // grew: once a new message renders, the reader is no longer near the bottom.
+    let wasAtBottom = true;
+    const update = () => {
+      wasAtBottom = isNearBottom();
+      setIsAtBottom(wasAtBottom);
+    };
     update();
+
+    // A refresh that brings in new messages grows the page; follow it only if the reader was
+    // already at the latest message, so scrolling up through history isn't interrupted.
+    const followNewMessages = new ResizeObserver(() => {
+      if (wasAtBottom) scrollToBottom('smooth');
+    });
+    followNewMessages.observe(document.body);
+
     window.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', update);
     return () => {
+      followNewMessages.disconnect();
       window.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
     };

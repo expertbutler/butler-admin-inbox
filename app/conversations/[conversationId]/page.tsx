@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getFreeFormWindow } from '@/lib/freeFormWindow';
 import { STATUS_CLASSES, STATUS_LABELS } from '@/lib/conversationStatus';
+import { AutoRefresh } from '@/components/AutoRefresh';
 import { ConversationActions } from '@/components/ConversationActions';
 import { WhatsAppMessage } from '@/types/database';
 
@@ -56,6 +57,7 @@ export default async function ConversationPage({
   return (
     // Bottom padding keeps the last messages clear of the fixed reply bar.
     <main className="pb-40">
+      <AutoRefresh />
       <Link href="/" className="text-sm underline">
         ← All conversations
       </Link>

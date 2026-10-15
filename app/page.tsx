@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { STATUS_CLASSES, STATUS_LABELS } from '@/lib/conversationStatus';
+import { AutoRefresh } from '@/components/AutoRefresh';
 
 const PAGE_SIZE = 25;
 
@@ -32,6 +33,7 @@ export default async function InboxPage({ searchParams }: { searchParams: Search
 
   return (
     <main>
+      <AutoRefresh />
       <h1 className="text-2xl font-bold">Conversations</h1>
       <p className="mt-1 text-sm text-slate-500">
         {total} conversation{total === 1 ? '' : 's'} across all hotels.
