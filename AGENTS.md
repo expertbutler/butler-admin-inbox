@@ -23,9 +23,10 @@ one of these, do not make it — stop and ask a developer.**
 3. **Never put a key, password or token in a file.**
    Not in code, not in a comment, not in a commit message, not "temporarily".
 
-4. **This app only reads conversations directly. It never writes to the database.**
-   Replying, marking resolved and handing back to the AI all happen by calling the main app over its
-   API. Do not reimplement any of that here, and do not write to Supabase from this app.
+4. **This app only reads conversations directly. Everything else goes through the main app.**
+   Replying, marking resolved, handing back to the AI, and reading or saving the AI prompt all happen
+   by calling the main app over its API. Do not reimplement any of that here, and do not write to
+   Supabase from this app.
 
 5. **We never message a guest who hasn't messaged us first.**
    Do not build a "new message" button, a "start conversation" flow, or any way to send to a typed-in
@@ -44,23 +45,29 @@ one of these, do not make it — stop and ask a developer.**
 # Part 2 — What this app is
 
 A super-admin-only view of every WhatsApp conversation between hotel guests and the AI concierge,
-across all hotels. It exists so the platform team can see and answer conversations that hotel staff
-would otherwise handle alone.
+across all hotels, plus the editor for the concierge's AI prompt. It exists so the platform team can
+see and answer conversations that hotel staff would otherwise handle alone, and tune how the AI
+behaves.
 
 It is a **separate application** from the main product (`butler-da`) on purpose: so that changes here
-cannot break the live concierge that real guests are talking to right now.
+cannot break the live concierge that real guests are talking to right now. The one deliberate
+exception is the AI prompt page: saving there changes what the AI says to every guest at every hotel,
+immediately.
 
 **What it does:** lists conversations in a filterable table, shows a conversation's full history, and
-lets a super admin reply, mark resolved, or hand back to the AI.
+lets a super admin reply, mark resolved, or hand back to the AI. The AI Prompt page (`/prompt`) edits
+the persona prompt, rewords a new rule into prompt language with OpenAI (flagging conflicts with
+existing rules), and appends rules to the prompt.
 
 **How it is wired:**
 
 - **Reading** conversations and messages happens directly against Supabase, using the signed-in super
   admin's own session. Row-level security already permits a super admin to read every hotel's
   conversations, so no special credential is needed.
-- **Writing** anything — a reply, a status change — is an HTTP call to the main app (`BUTLER_DA_API_URL`),
-  which holds the credentials and the message-sending logic. That call is made from this app's own
-  server, forwarding the user's access token, so the token never reaches the browser.
+- **Writing** anything — a reply, a status change, the AI prompt — and reading the AI prompt is an
+  HTTP call to the main app (`BUTLER_DA_API_URL`), which holds the credentials, the OpenAI key and the
+  message-sending logic. That call is made from this app's own server, forwarding the user's access
+  token, so the token never reaches the browser.
 
 This split is the whole safety model. Reads are harmless: a mistake breaks a view. Writes reach real
 guests on WhatsApp, so they live in the repository that isn't edited this way.
@@ -131,5 +138,9 @@ user can observe, not internal implementation details.
   identified by hotel *and* phone number together, never by phone number alone.
 - **`last_message_at` is not the guest's last message.** Staff and AI replies update it too. Anything
   about whether a guest can be messaged must be based on the last message whose sender is the guest.
+- **AI prompt saves are compare-and-swap.** Every save and rule append sends the prompt text it was
+  based on; if the stored prompt has changed since, butler-da answers 409 and the admin must reload.
+  After a successful write, adopt the prompt butler-da returns (it trims whitespace), never the text
+  you sent, or the next save will be rejected.
 - **The AI stops replying once a human does.** Sending a reply moves a conversation to "staff handling"
   and the AI stays quiet until it is handed back or marked resolved. That is intended.
