@@ -35,7 +35,18 @@ export const callButlerDa = async ({
     },
     body: JSON.stringify(body),
     cache: 'no-store',
+    // butler-da redirects requests it doesn't recognise to its login page. Followed, that
+    // arrives as a 200 HTML page and the write would look like it succeeded.
+    redirect: 'manual',
   });
+
+  const isJson = response.headers.get('content-type')?.includes('application/json') ?? false;
+  if (!isJson) {
+    return {
+      status: 502,
+      payload: { error: `butler-da did not accept this request (HTTP ${response.status}).` },
+    };
+  }
 
   return { status: response.status, payload: await response.json().catch(() => ({})) };
 };
