@@ -86,14 +86,18 @@ export default async function InboxPage({ searchParams }: { searchParams: Search
           </thead>
           <tbody>
             {(conversations ?? []).map((conversation) => (
-              <tr key={conversation.id} className="border-b border-slate-100 last:border-0">
+              <tr
+                key={conversation.id}
+                className="relative border-b border-slate-100 last:border-0 hover:bg-slate-50"
+              >
                 <td className="px-4 py-3">
                   {hotelNames.get(conversation.hotel_id) ?? conversation.hotel_id}
                 </td>
                 <td className="px-4 py-3">
+                  {/* The ::after overlay stretches this link over the whole row, so any cell opens it. */}
                   <Link
                     href={`/conversations/${conversation.id}`}
-                    className="font-medium underline"
+                    className="font-medium underline after:absolute after:inset-0"
                   >
                     {conversation.guest_phone}
                   </Link>

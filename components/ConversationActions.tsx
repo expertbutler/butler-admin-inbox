@@ -62,7 +62,7 @@ export const ConversationActions = ({
     run(() => post(`/api/conversations/${conversationId}/status`, { status }));
 
   return (
-    <div className="mt-6 flex flex-col gap-3">
+    <>
       <div className="flex gap-2">
         <button
           type="button"
@@ -82,39 +82,43 @@ export const ConversationActions = ({
         </button>
       </div>
 
-      {isWindowOpen ? (
-        <div className="flex gap-2">
-          <input
-            value={reply}
-            onChange={(event) => setReply(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                handleSend();
-              }
-            }}
-            placeholder="Type a reply…"
-            aria-label="Reply"
-            className="flex-1 rounded border border-slate-300 px-3 py-2"
-          />
-          <button
-            type="button"
-            onClick={handleSend}
-            disabled={isBusy}
-            className="rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
-          >
-            Send
-          </button>
-        </div>
-      ) : (
-        <p className="rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-          {lastGuestMessageAt
-            ? `This guest last wrote on ${new Date(lastGuestMessageAt).toLocaleString()}. WhatsApp only allows a reply within 24 hours of a guest's own message, so you can't message them until they write again.`
-            : "This guest hasn't written yet, so they can't be messaged."}
-        </p>
-      )}
+      <div className="fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-3">
+          {isWindowOpen ? (
+            <div className="flex gap-2">
+              <input
+                value={reply}
+                onChange={(event) => setReply(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    handleSend();
+                  }
+                }}
+                placeholder="Type a reply…"
+                aria-label="Reply"
+                className="flex-1 rounded border border-slate-300 px-3 py-2"
+              />
+              <button
+                type="button"
+                onClick={handleSend}
+                disabled={isBusy}
+                className="rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
+              >
+                Send
+              </button>
+            </div>
+          ) : (
+            <p className="rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              {lastGuestMessageAt
+                ? `This guest last wrote on ${new Date(lastGuestMessageAt).toLocaleString()}. WhatsApp only allows a reply within 24 hours of a guest's own message, so you can't message them until they write again.`
+                : "This guest hasn't written yet, so they can't be messaged."}
+            </p>
+          )}
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
-    </div>
+          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        </div>
+      </div>
+    </>
   );
 };

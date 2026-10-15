@@ -54,21 +54,29 @@ export default async function ConversationPage({
   const freeFormWindow = getFreeFormWindow(messages ?? []);
 
   return (
-    <main>
+    // Bottom padding keeps the last messages clear of the fixed reply bar.
+    <main className="pb-40">
       <Link href="/" className="text-sm underline">
         ← All conversations
       </Link>
 
-      <header className="mt-4 flex flex-wrap items-baseline justify-between gap-2">
+      <header className="mt-4 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">{conversation.guest_phone}</h1>
           <p className="text-sm text-slate-500">
             {hotel?.name ?? conversation.hotel_id} · Room {conversation.room_number ?? '—'}
           </p>
         </div>
-        <span className={`rounded px-2 py-1 text-xs ${STATUS_CLASSES[conversation.status]}`}>
-          {STATUS_LABELS[conversation.status]}
-        </span>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className={`rounded px-2 py-1 text-xs ${STATUS_CLASSES[conversation.status]}`}>
+            {STATUS_LABELS[conversation.status]}
+          </span>
+          <ConversationActions
+            conversationId={conversation.id}
+            isWindowOpen={freeFormWindow.isOpen}
+            lastGuestMessageAt={freeFormWindow.lastGuestMessageAt}
+          />
+        </div>
       </header>
 
       <div className="mt-6 flex flex-col gap-3">
@@ -94,12 +102,6 @@ export default async function ConversationPage({
           );
         })}
       </div>
-
-      <ConversationActions
-        conversationId={conversation.id}
-        isWindowOpen={freeFormWindow.isOpen}
-        lastGuestMessageAt={freeFormWindow.lastGuestMessageAt}
-      />
     </main>
   );
 }
