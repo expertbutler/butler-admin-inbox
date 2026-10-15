@@ -31,9 +31,18 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const isPublic = PUBLIC_PATHS.some((path) => request.nextUrl.pathname.startsWith(path));
+  // A fetch follows a redirect to /login silently and gets a 200 HTML page, so API calls get a
+  // JSON error the page can show instead.
+  const isApi = request.nextUrl.pathname.startsWith('/api/');
 
   if (!user) {
     if (isPublic) return response;
+    if (isApi) {
+      return NextResponse.json(
+        { error: 'Your session has expired. Reload the page to sign in again.' },
+        { status: 401 },
+      );
+    }
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
@@ -49,6 +58,12 @@ export async function updateSession(request: NextRequest) {
 
   if (userRole?.role !== 'super-admin') {
     await supabase.auth.signOut();
+    if (isApi) {
+      const denied = NextResponse.json({ error: 'Super admins only.' }, { status: 403 });
+      // Carry over the cookies signOut just cleared, so the session really ends.
+      response.cookies.getAll().forEach((cookie) => denied.cookies.set(cookie));
+      return denied;
+    }
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('denied', '1');
