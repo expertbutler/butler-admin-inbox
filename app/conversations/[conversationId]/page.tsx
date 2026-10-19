@@ -58,29 +58,33 @@ export default async function ConversationPage({
     // Bottom padding keeps the last messages clear of the fixed reply bar.
     <main className="pb-40">
       <AutoRefresh />
-      <Link href="/" className="text-sm underline">
-        ← All conversations
-      </Link>
+      {/* Pinned to the top so the guest details and status buttons stay in reach while scrolling
+          through history. The negative margin spans the layout's padding so messages scroll under it. */}
+      <div className="sticky top-0 z-10 -mx-6 border-b border-slate-200 bg-slate-50 px-6 py-3">
+        <Link href="/" className="text-sm underline">
+          ← All conversations
+        </Link>
 
-      <header className="mt-4 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-bold">{conversation.guest_phone}</h1>
-          <p className="text-sm text-slate-500">
-            {hotel?.name ?? conversation.hotel_id} · Room {conversation.room_number ?? '—'}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <span className={`rounded px-2 py-1 text-xs ${STATUS_CLASSES[conversation.status]}`}>
-            {STATUS_LABELS[conversation.status]}
-          </span>
-          <ConversationActions
-            conversationId={conversation.id}
-            status={conversation.status}
-            isWindowOpen={freeFormWindow.isOpen}
-            lastGuestMessageAt={freeFormWindow.lastGuestMessageAt}
-          />
-        </div>
-      </header>
+        <header className="mt-2 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h1 className="text-2xl font-bold">{conversation.guest_phone}</h1>
+            <p className="text-sm text-slate-500">
+              {hotel?.name ?? conversation.hotel_id} · Room {conversation.room_number ?? '—'}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className={`rounded px-2 py-1 text-xs ${STATUS_CLASSES[conversation.status]}`}>
+              {STATUS_LABELS[conversation.status]}
+            </span>
+            <ConversationActions
+              conversationId={conversation.id}
+              status={conversation.status}
+              isWindowOpen={freeFormWindow.isOpen}
+              lastGuestMessageAt={freeFormWindow.lastGuestMessageAt}
+            />
+          </div>
+        </header>
+      </div>
 
       <div className="mt-6 flex flex-col gap-3">
         {(messages ?? []).map((message) => {
