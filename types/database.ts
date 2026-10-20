@@ -25,6 +25,8 @@ export type WhatsAppMessage = {
   sender_role: string;
   content: string;
   sent_by_user_id: string | null;
+  // Set by butler-da when the AI judged only staff can deal with this guest message. Never cleared.
+  needs_staff: boolean;
   created_at: string;
 };
 
