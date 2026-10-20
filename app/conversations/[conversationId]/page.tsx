@@ -94,10 +94,17 @@ export default async function ConversationPage({
               key={message.id}
               className={`flex flex-col ${isGuest ? 'items-start' : 'items-end'}`}
             >
-              <p className="text-xs font-semibold text-slate-500">{senderLabel(message)}</p>
+              <p className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                {senderLabel(message)}
+                {message.needs_staff && (
+                  <span className="rounded bg-red-100 px-2 py-0.5 text-red-800">Needs staff</span>
+                )}
+              </p>
               <p
                 className={`max-w-[80%] whitespace-pre-wrap rounded-lg p-3 ${
-                  isGuest ? 'bg-white border border-slate-200' : 'bg-slate-900 text-white'
+                  isGuest
+                    ? `bg-white border ${message.needs_staff ? 'border-l-4 border-red-500' : 'border-slate-200'}`
+                    : 'bg-slate-900 text-white'
                 }`}
               >
                 {message.content}
